@@ -21,7 +21,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -107,10 +106,11 @@ class ClientTest {
     }
 
     @Test
-    void needsAnApiKey() {
-        Assumptions.assumeTrue(System.getenv("LYSTOK_API_KEY") == null, "LYSTOK_API_KEY is set");
-        assertThrows(IllegalArgumentException.class, Lystok::fromEnv);
+    void refusesAnEmptyApiKey() {
         assertThrows(IllegalArgumentException.class, () -> new Lystok(null));
+        assertThrows(IllegalArgumentException.class, () -> new Lystok(""));
+        assertThrows(IllegalArgumentException.class, () -> new Lystok("  "));
+        assertThrows(IllegalArgumentException.class, () -> Lystok.builder().build());
     }
 
     @Test

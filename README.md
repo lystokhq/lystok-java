@@ -27,7 +27,7 @@ Create an API key in Lystok → Settings → For developers, and verify your sen
 ```java
 import com.lystok.*;
 
-Lystok lystok = Lystok.fromEnv(); // reads LYSTOK_API_KEY
+Lystok lystok = new Lystok(System.getenv("LYSTOK_API_KEY"));
 
 EmailCreated email = lystok.emails().send(SendEmailParams.builder()
         .from("Shop <orders@shop.example>")
@@ -43,7 +43,7 @@ Kotlin:
 ```kotlin
 import com.lystok.*
 
-val lystok = Lystok.fromEnv()
+val lystok = Lystok(System.getenv("LYSTOK_API_KEY"))
 
 val email = lystok.emails().send(
     SendEmailParams.builder()
@@ -56,8 +56,19 @@ val email = lystok.emails().send(
 println(email.id())
 ```
 
-`new Lystok("lk_live_…")` takes the key directly. Keys belong on your server: never put one in a
-browser or a mobile app. Make one client and share it: it is safe to use from many threads.
+The client takes the key as an argument; the library never reads the environment itself, so keep
+the key wherever you like (an environment variable of any name, `application.yml`, a secrets
+manager). Keys belong on your server: never put one in a browser or a mobile app. Make one client
+and share it: it is safe to use from many threads.
+
+In Spring Boot, one bean for the whole app:
+
+```java
+@Bean
+Lystok lystok(@Value("${lystok.api-key}") String apiKey) {
+    return new Lystok(apiKey);
+}
+```
 
 ### With a template
 

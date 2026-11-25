@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * The Lystok API client. Safe to share between threads; make one and keep it.
  *
  * <pre>{@code
- * Lystok lystok = Lystok.fromEnv(); // reads LYSTOK_API_KEY
+ * Lystok lystok = new Lystok(System.getenv("LYSTOK_API_KEY"));
  * EmailCreated email = lystok.emails().send(SendEmailParams.builder()
  *         .from("Shop <orders@shop.example>")
  *         .to("olena@example.com")
@@ -46,17 +46,22 @@ public final class Lystok {
     private final Contacts contacts;
     private final Webhooks webhooks;
 
-    /** A client with this API key and the default options. */
+    /**
+     * A client with this API key and the default options.
+     *
+     * @param apiKey an API key from Settings → For developers ({@code lk_live_…}); read it from
+     *     wherever you keep secrets
+     * @throws IllegalArgumentException when the key is null or blank
+     */
     public Lystok(String apiKey) {
         this(builder().apiKey(apiKey));
     }
 
     private Lystok(Builder b) {
-        String key = b.apiKey != null ? b.apiKey : System.getenv("LYSTOK_API_KEY");
-        if (key == null || key.isEmpty()) {
-            throw new IllegalArgumentException("Missing API key: pass it to new Lystok(\"lk_live_...\") or set LYSTOK_API_KEY");
+        if (b.apiKey == null || b.apiKey.isBlank()) {
+            throw new IllegalArgumentException("Missing API key: pass your Lystok API key (lk_live_…) to new Lystok(apiKey) or Lystok.builder().apiKey(apiKey)");
         }
-        this.apiKey = key;
+        this.apiKey = b.apiKey;
         this.baseUrl = (b.baseUrl != null ? b.baseUrl : DEFAULT_BASE_URL).replaceAll("/+$", "");
         this.timeout = b.timeout;
         this.maxRetries = Math.max(0, b.maxRetries);
@@ -66,11 +71,6 @@ public final class Lystok {
         this.emails = new Emails(this);
         this.contacts = new Contacts(this);
         this.webhooks = new Webhooks();
-    }
-
-    /** A client with the key from the {@code LYSTOK_API_KEY} environment variable. */
-    public static Lystok fromEnv() {
-        return builder().build();
     }
 
     public static Builder builder() {
@@ -224,7 +224,7 @@ public final class Lystok {
         private Builder() {
         }
 
-        /** An API key from Settings → For developers; {@code LYSTOK_API_KEY} when not set. */
+        /** An API key from Settings → For developers ({@code lk_live_…}). Required. */
         public Builder apiKey(String apiKey) {
             this.apiKey = apiKey;
             return this;

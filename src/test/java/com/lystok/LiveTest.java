@@ -27,7 +27,7 @@ class LiveTest {
     @BeforeEach
     void setUp() {
         String base = System.getenv("LYSTOK_BASE_URL");
-        lystok = Lystok.builder().baseUrl(base == null || base.isEmpty() ? null : base).build();
+        lystok = Lystok.builder().apiKey(System.getenv("LYSTOK_API_KEY")).baseUrl(base == null || base.isEmpty() ? null : base).build();
         to = System.getenv("LYSTOK_TEST_TO");
     }
 
